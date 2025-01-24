@@ -1,0 +1,70 @@
+<!DOCTYPE html>
+<html lang="en">
+    <head>
+        <meta charset="UTF-8">
+        <meta http-equiv="X-UA-Compatible" content="IE=edge">
+        <meta name="viewport" content="width=device-width, initial-scale=1.0">
+        <title>Frame generator</title>
+    </head>
+    <body>
+        <input type="text" id="name" placeholder="Write the name">
+        <select name="frame" id="frame"></select>
+        <input type="color" name="frame color" id="color">
+        <input type="number" id="level" placeholder="Write the level">
+        <input type="number" id="xp" placeholder="Write the xp %">
+        <button id="generate">Generate</button>
+
+        <img id="generated" src="" alt="Generated frame">
+
+        <script>
+            (async () =>{
+                const frame = document.getElementById('frame');
+                const frames = await fetch('https://api.sgc.se/public_api/frame/get/config', {
+                    method: 'POST',
+                    headers: {
+                        'Content-Type': 'application/json'
+                    },
+                    body: JSON.stringify({
+                        "guildId":"516605157795037185"
+                    })
+                }).then(res => res.json()).then(data => {
+                    data.forEach(f => {
+                        const option = document.createElement('option');
+                        option.value = f.id;
+                        option.innerText = f.name;
+                        frame.appendChild(option);
+                    })
+                })
+            })()
+
+            document.getElementById('generate').addEventListener('click', async () => {
+                const name = document.getElementById('name').value;
+                const frame = document.getElementById('frame').value;
+                const color = document.getElementById('color').value;
+                const level = document.getElementById('level').value;
+                const xp = document.getElementById('xp').value;
+
+                await fetch("https://api.sgc.se/public_api/frame/generate", {
+                    method: 'POST',
+                    headers: {
+                        'Content-Type': 'application/json'
+                    },
+                    body: JSON.stringify({
+                        "userid": "FrameGen",
+                        "username": name,
+                        "frame_id": frame,
+                        "hex_color": color,
+                        "level": level,
+                        "xp_percentage": xp,
+                        "force":true
+                    })
+                }).then(res => res.blob()).then(blob => {
+                    const url = URL.createObjectURL(blob);
+                    document.getElementById('generated').src = url;
+                })
+            })
+
+            
+        </script>
+    </body>
+</html>
